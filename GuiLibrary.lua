@@ -143,102 +143,82 @@ end
 
 local TargetHud = {}
 
-local HudFrame = Instance.new("Frame", ScreenGui)
-HudFrame.Size = UDim2.fromScale(0.14, 0.07)
-HudFrame.Position = UDim2.fromScale(0.6, 0.4)
-HudFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-HudFrame.BackgroundTransparency = 0.5
-HudFrame.BorderSizePixel = 0
-HudFrame.Visible = false
+local TargetHudFrame = Instance.new("Frame", ScreenGui)
+TargetHudFrame.Visible = false
+TargetHudFrame.Size = UDim2.fromScale(0.125, 0.06)
+TargetHudFrame.Position = UDim2.fromScale(0.6,0.5)
+TargetHudFrame.BorderSizePixel = 0
+TargetHudFrame.BackgroundTransparency = 0.5
+TargetHudFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Instance.new("UICorner", TargetHudFrame)
 
-local HudCorner = Instance.new("UICorner", HudFrame)
-HudCorner.CornerRadius = UDim.new(0, 6)
+local TargetHudImage = Instance.new("ImageLabel", TargetHudFrame)
+TargetHudImage.Size = UDim2.fromScale(0.2,0.8)
+TargetHudImage.Position = UDim2.fromScale(0.03,0.1)
+TargetHudImage.BorderSizePixel = 0
+TargetHudImage.BackgroundTransparency = 0.5
+TargetHudImage.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Instance.new("UICorner", TargetHudImage).CornerRadius = UDim.new(0.25,0)
 
-local ProfileBack = Instance.new("Frame", HudFrame)
-ProfileBack.Size = UDim2.fromScale(0.22, 0.9)
-ProfileBack.Position = UDim2.fromScale(0.02, 0.05)
-ProfileBack.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-ProfileBack.BackgroundTransparency = 0.4
-ProfileBack.BorderSizePixel = 0
+local TargetHudName = Instance.new("TextLabel", TargetHudFrame)
+TargetHudName.Text = "Username"
+TargetHudName.Position = UDim2.fromScale(0.26,0.25)
+TargetHudName.TextColor3 = Color3.fromRGB(255,255,255)
+TargetHudName.Size = UDim2.fromScale(0.6, 0.05)
+TargetHudName.TextSize = 11
+TargetHudName.TextXAlignment = Enum.TextXAlignment.Left
+TargetHudName.BackgroundTransparency = 1
 
-local ProfileBackCorner = Instance.new("UICorner", ProfileBack)
-ProfileBackCorner.CornerRadius = UDim.new(1, 0)
+local TargetHudHealthbarBack = Instance.new("Frame", TargetHudFrame)
+TargetHudHealthbarBack.Position = UDim2.fromScale(0.26, 0.49)
+TargetHudHealthbarBack.Size = UDim2.fromScale(0.67,0.33)
+TargetHudHealthbarBack.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Instance.new("UICorner", TargetHudHealthbarBack).CornerRadius = UDim.new(0.4,0)
 
-local ProfilePic = Instance.new("ImageLabel", ProfileBack)
-ProfilePic.Size = UDim2.fromScale(1, 1)
-ProfilePic.Position = UDim2.fromScale(0, 0)
-ProfilePic.BackgroundTransparency = 1
-ProfilePic.Image = ""
-ProfilePic.Name = "ProfilePic"
-
-local NameLabel = Instance.new("TextLabel", HudFrame)
-NameLabel.Size = UDim2.fromScale(0.7, 0.4)
-NameLabel.Position = UDim2.fromScale(0.28, 0.1)
-NameLabel.BackgroundTransparency = 1
-NameLabel.TextScaled = true
-NameLabel.Font = Enum.Font.GothamBold
-NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-NameLabel.Text = ""
-NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-NameLabel.Name = "NameLabel"
-
-local HealthBack = Instance.new("Frame", HudFrame)
-HealthBack.Size = UDim2.fromScale(0.7, 0.2)
-HealthBack.Position = UDim2.fromScale(0.28, 0.65)
-HealthBack.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-HealthBack.BorderSizePixel = 0
-
-local HealthBackCorner = Instance.new("UICorner", HealthBack)
-HealthBackCorner.CornerRadius = UDim.new(1, 0)
-
-local HealthBar = Instance.new("Frame", HealthBack)
-HealthBar.Size = UDim2.fromScale(1, 1)
-HealthBar.Position = UDim2.fromScale(0, 0)
-HealthBar.BackgroundColor3 = Color3.fromRGB(50, 205, 50)
-HealthBar.BorderSizePixel = 0
-HealthBar.Name = "HealthBar"
+local TargetHudHealthbar = Instance.new("Frame", TargetHudHealthbarBack)
+TargetHudHealthbar.Size = UDim2.fromScale(1,1)
+TargetHudHealthbar.BackgroundColor3 = GuiLibrary.Theme
+Instance.new("UICorner", TargetHudHealthbar).CornerRadius = UDim.new(0.4,0)
 
 GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
-	HealthBar.BackgroundColor3 = newTheme
+	TargetHudHealthbar.BackgroundColor3 = newTheme
 end)
-
-local HealthCorner = Instance.new("UICorner", HealthBar)
-HealthCorner.CornerRadius = UDim.new(1, 0)
-
-HealthBar.Parent = HealthBack
-ProfileBack.Parent = HudFrame
 
 local TargetHudEvent
 
 function TargetHud.SetTarget(player)
 	task.spawn(function()
 		if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-			HudFrame.Visible = true
-			NameLabel.Text = player.Name
-			ProfilePic.Image = "http://www.roblox.com/Thumbs/Avatar.ashx?x=100&y=100&Format=Png&username=" .. player.Name
+			TargetHudFrame.Visible = true
+			TargetHudName.Text = player.DisplayName
+			TargetHudImage.Image = PlayerService:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size60x60)
+			local lasthp = player.Character.Humanoid.Health
+			TargetHudEvent = player.Character.Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+				TweenService:Create(TargetHudHealthbar, TweenInfo.new(0.1), {
+					Size = UDim2.fromScale(player.Character.Humanoid.Health / player.Character.Humanoid.MaxHealth, 1)
+				}):Play()
 
-			local humanoid = player.Character:FindFirstChild("Humanoid")
-			if humanoid then
-				local healthPercentage = humanoid.Health / humanoid.MaxHealth
-				TargetHudEvent = humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-					task.spawn(function()
-						healthPercentage = humanoid.Health / humanoid.MaxHealth
-						TweenService:Create(HealthBar, TweenInfo.new(0.3), {
-							Size = UDim2.fromScale(healthPercentage, 1)
+				if player.Character.Humanoid.Health < lasthp then
+					TweenService:Create(TargetHudImage, TweenInfo.new(0.1), {
+						BackgroundColor3 = Color3.fromRGB(150,0,0)
+					}):Play()
+					task.delay(0.1, function()
+						TweenService:Create(TargetHudImage, TweenInfo.new(0.1), {
+							BackgroundColor3 = Color3.fromRGB(0,0,0)
 						}):Play()
-
-						HealthBar.BackgroundColor3 = GuiLibrary.Theme
 					end)
-				end)
-				HealthBar.Size = UDim2.fromScale(healthPercentage, 1)
-			end
+				end
+
+				lasthp = player.Character.Humanoid.Health
+			end)
 		end
 	end)
 end
 
 function TargetHud.Clear()
 	task.spawn(function()
-		HudFrame.Visible = false
+
+		TargetHudFrame.Visible = false
 
 		pcall(function()
 			TargetHudEvent:Disconnect()
@@ -369,6 +349,7 @@ function GuiLibrary:CreateNotification(text, duration)
 	Notification.TextSize = 22
 	Notification.TextXAlignment = Enum.TextXAlignment.Left
 	Notification.Font = Enum.Font.SourceSans
+	Notification.BackgroundTransparency = 0.5
 
 	local size = getAccurateTextSize("  "..text, 22)
 
@@ -409,7 +390,7 @@ end
 
 local WindowCount = 0
 function GuiLibrary:CreateWindow(name)
-	
+
 	if WindowPositionConfig[name] == nil then
 		WindowPositionConfig[name] = {x = nil, y = nil}
 	end
@@ -423,7 +404,7 @@ function GuiLibrary:CreateWindow(name)
 	Top.TextColor3 = Color3.fromRGB(255,255,255)
 	Top.TextSize = 12
 	Top.TextXAlignment = Enum.TextXAlignment.Left
-	Top.BackgroundTransparency = 0.5
+	Top.BackgroundTransparency = 0.25
 	Top.Draggable = true
 	Top.Active = true
 	Top.DragStopped:Connect(function(x, y)
@@ -436,7 +417,7 @@ function GuiLibrary:CreateWindow(name)
 			writefile("Moon/GuiLocations.json", HttpService:JSONEncode(WindowPositionConfig))
 		end)
 	end)
-	
+
 	if WindowPositionConfig[name].x ~= nil then
 		Top.Position = UDim2.fromOffset(WindowPositionConfig[name].x,WindowPositionConfig[name].y)
 	end
@@ -979,17 +960,42 @@ ArrayShadow = ArrayListModule.CreateToggle({
 	Name = "Shadow",
 	Function = function() end,
 })
-ArrayLogo = ArrayListModule.CreatePicker({
-	Name = "Logo",
-	Options = {"Image", "Text"},
-	Function = function() end,
-})
 ArrayScale = ArrayListModule.CreateSlider({
 	Name = "Scale",
 	Default = 100,
 	Min = 0,
 	Max = 100,
 	Step = 1,
+})
+ArrayX = ArrayListModule.CreateSlider({
+	Name = "X",
+	Default = 1000,
+	Min = 0,
+	Max = 1000,
+	Step = 1,
+	Function = function(v)
+		
+		v -= 350
+		
+		if v <= 300 then
+			ArrayListFrameSorter.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		else
+			ArrayListFrameSorter.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		end
+		
+		SubArrayListFrame.Position = UDim2.fromScale(v / 1000, SubArrayListFrame.Position.Y.Scale)
+	end,
+})
+
+ArrayY = ArrayListModule.CreateSlider({
+	Name = "Y",
+	Default = 0,
+	Min = 0,
+	Max = 1000,
+	Step = 1,
+	Function = function(v)
+		SubArrayListFrame.Position = UDim2.fromScale(SubArrayListFrame.Position.X.Scale, v / 1000)
+	end,
 })
 
 CustomTheme = GuiLibrary.Windows.Render.CreateModuleButton({
@@ -1057,6 +1063,41 @@ CustomThemeColorBlue = CustomTheme.CreateSlider({
 	Min = 0,
 	Max = 255,
 	Step = 1
+})
+
+local oldTargetHudCreate = TargetHud.SetTarget
+TargetHudModule = GuiLibrary.Windows.Render.CreateModuleButton({
+	Name = "TargetHud",
+	Function = function(callback)
+		if callback then
+			TargetHud.SetTarget = oldTargetHudCreate
+		else
+			TargetHud.SetTarget = function() end
+			TargetHud.Clear()
+		end
+	end,
+})
+
+TargetHudX = TargetHudModule.CreateSlider({
+	Name = "X",
+	Default = 600,
+	Min = 0,
+	Max = 1000,
+	Step = 1,
+	Function = function(v)
+		TargetHudFrame.Position = UDim2.fromScale(v / 1000, TargetHudFrame.Position.Y.Scale)
+	end,
+})
+
+TargetHudY = TargetHudModule.CreateSlider({
+	Name = "Y",
+	Default = 600,
+	Min = 0,
+	Max = 1000,
+	Step = 1,
+	Function = function(v)
+		TargetHudFrame.Position = UDim2.fromScale(TargetHudFrame.Position.X.Scale, v / 1000)
+	end,
 })
 
 Uninject = GuiLibrary.Windows.Utility.CreateModuleButton({
