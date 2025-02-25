@@ -3,12 +3,16 @@ Copyright (c) 2025 Damc
 
 This license grants permission to use, modify, and distribute the script known as Moon (the “Software”), under the following terms and conditions:
 
-1. Grant of Permission
+1. Unauthorized Disclosure & Legal Consequences
+Any unauthorized leaking, sharing, or distribution of private source code without explicit permission from the Licensor is strictly prohibited. Violators will be subject to immediate legal action, including but not limited to civil lawsuits, claims for monetary damages, and potential criminal prosecution. The Licensor reserves the right to seek maximum legal penalties against any individual or entity found responsible for such violations.
+
+2. Grant of Permission
 Subject to compliance with this license, any individual or entity (the “User”) is granted a non-exclusive, non-transferable, revocable license to:
 
 Use, copy, and modify the Software for personal, educational, research, or commercial purposes.
 Distribute modified or unmodified copies of the Software, provided all conditions of this license are met.
-2. Reserved Rights & Revocation
+
+3. Reserved Rights & Revocation
 The original author (“Licensor”) explicitly reserves the right to:
 
 Demand the removal of any fork, modification, or derivative work at their sole discretion, for any reason, including but not limited to:
@@ -19,18 +23,22 @@ Require removal of such forks or modifications from public access within 14 days
 Enforce revocation of rights granted under this license if the User violates any of the stated terms.
 Failure to comply with a revocation request may result in legal action.
 
-3. Modification & Attribution Requirements
+4. Modification & Attribution Requirements
 Any publicly distributed modified version of the Software must clearly state modifications made and must retain attribution to the original author (“Damc”).
-4. Prohibited Uses
+
+5. Prohibited Uses
 The Software may not be used for:
 
 Any illegal activities under applicable laws.
 The creation of malware, spyware, or unauthorized exploitation of digital systems.
 Any project that violates human rights, promotes hate speech, or contributes to unethical practices.
-5. Liability & Warranty Disclaimer
+
+6. Liability & Warranty Disclaimer
 THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OR DISTRIBUTION OF THIS SOFTWARE.
 
-6. License Termination & Amendments
+7. License Termination & Amendments
 The Licensor reserves the right to amend this license at any time. Continued use of the Software after an amendment constitutes acceptance of the new terms.
 Any violation of this license automatically terminates all granted rights, requiring immediate cessation of use, distribution, and modification.
+
 By using, modifying, or distributing this Software, you acknowledge and agree to the terms outlined in this license.
+
