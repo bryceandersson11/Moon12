@@ -95,6 +95,15 @@ local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or lplr.PlayerGu
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 
+local MobileSupportButton = Instance.new("TextButton", ScreenGui)
+MobileSupportButton.Text = "MOON"
+MobileSupportButton.TextSize = 12
+MobileSupportButton.TextColor3 = Color3.fromRGB(255,255,255)
+MobileSupportButton.BackgroundTransparency = 0.5
+MobileSupportButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MobileSupportButton.Size = UDim2.fromScale(0.05,0.02)
+MobileSupportButton.Position = UDim2.fromScale(0.095,0.1)
+
 local NotificationFrame = Instance.new("Frame", ScreenGui)
 NotificationFrame.Size = UDim2.fromScale(0.3, 0.9)
 NotificationFrame.Position = UDim2.fromScale(0.7,0)
@@ -200,7 +209,7 @@ function TargetHud.SetTarget(player)
 
 				if player.Character.Humanoid.Health < lasthp then
 					TweenService:Create(TargetHudImage, TweenInfo.new(0.1), {
-						BackgroundColor3 = Color3.fromRGB(150,0,0)
+						BackgroundColor3 = Color3.fromRGB(100,0,0)
 					}):Play()
 					task.delay(0.1, function()
 						TweenService:Create(TargetHudImage, TweenInfo.new(0.1), {
@@ -236,9 +245,26 @@ local ArrayList = {
 		Item.TextSize = 22
 		Item.TextColor3 = GuiLibrary.Theme
 		Item.BackgroundTransparency = 0.5
-		Item.BorderSizePixel = 0
+		Item.BorderSizePixel = 0.2
 		Item.Font = Enum.Font.SourceSans
 		Item.ZIndex = 3
+		Item.BorderColor3 = Color3.fromRGB(0,0,0)
+
+		local ItemArrayHolder = Instance.new("Frame", Item)
+		ItemArrayHolder.Size = UDim2.new(1,0,0,1)
+		ItemArrayHolder.Position = UDim2.fromScale(0, 0.94)
+		ItemArrayHolder.BorderSizePixel = 0
+		ItemArrayHolder.BackgroundTransparency = 0.5
+		ItemArrayHolder.BackgroundColor3 = Color3.fromRGB(0,0,0)
+
+		task.spawn(function()
+			repeat
+				pcall(function()
+					ItemArrayHolder.BackgroundTransparency = Item.BackgroundTransparency == 0.5 and 0.8 or 1
+				end)
+				task.wait()
+			until Item == nil
+		end)
 
 		local size = getAccurateTextSize(name, 22)
 
@@ -272,6 +298,7 @@ local ArrayList = {
 		table.sort(SortedArray, function(a, b)
 			return getAccurateTextSize(a.Text, a.TextSize) > getAccurateTextSize(b.Text, b.TextSize)
 		end)
+		
 
 		for i, v in ipairs(SortedArray) do
 			v.LayoutOrder = i
@@ -349,11 +376,15 @@ function GuiLibrary:CreateNotification(text, duration)
 	Notification.TextSize = 22
 	Notification.TextXAlignment = Enum.TextXAlignment.Left
 	Notification.Font = Enum.Font.SourceSans
-	Notification.BackgroundTransparency = 0.5
+	Notification.BackgroundTransparency = 0
 
 	local size = getAccurateTextSize("  "..text, 22)
 
-	Notification.Size = UDim2.new(0.05,size,0.055,0)
+	Notification.Size = UDim2.new(0,0,0.055,0)
+
+	TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Bounce), {
+		Size = UDim2.new(0.05,size,0.055,0)
+	}):Play()
 
 	local NotificationDuration = Instance.new("Frame", Notification)
 	NotificationDuration.Size = UDim2.fromScale(1, 0.05)
@@ -388,6 +419,8 @@ if isfile("Moon/GuiLocations.json") then
 	WindowPositionConfig = HttpService:JSONDecode(readfile("Moon/GuiLocations.json"))
 end
 
+local ModuleCount, SettingStats = 0, 0
+
 local WindowCount = 0
 function GuiLibrary:CreateWindow(name)
 
@@ -396,35 +429,56 @@ function GuiLibrary:CreateWindow(name)
 	end
 
 	local Top = Instance.new("TextLabel", ScreenGui)
-	Top.Size = UDim2.fromScale(0.1, 0.04)
+	Top.Size = UDim2.fromScale(0.1, 0.035)
 	Top.Position = UDim2.fromScale(0.15 + (0.12 * WindowCount), 0.15)
 	Top.BorderSizePixel = 0
-	Top.BackgroundColor3 = GuiLibrary.Theme
+	Top.BackgroundColor3 = Color3.fromRGB(35,35,35)
 	Top.Text = "  "..name
 	Top.TextColor3 = Color3.fromRGB(255,255,255)
 	Top.TextSize = 12
 	Top.TextXAlignment = Enum.TextXAlignment.Left
-	Top.BackgroundTransparency = 0.25
-	Top.Draggable = true
+	Top.BackgroundTransparency = 0
 	Top.Active = true
-	Top.DragStopped:Connect(function(x, y)
-		WindowPositionConfig[name].x = x
-		WindowPositionConfig[name].y = y
-		task.delay(0.1,function()
-			if isfile("Moon/GuiLocations.json") then
-				delfile("Moon/GuiLocations.json")
-			end
-			writefile("Moon/GuiLocations.json", HttpService:JSONEncode(WindowPositionConfig))
-		end)
+
+	local dragging = false
+	Top.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			task.spawn(function()
+				repeat
+					local mousePos = UserInputService:GetMouseLocation()
+					TweenService:Create(Top, TweenInfo.new(0.2), {
+						Position = UDim2.fromOffset(mousePos.X,mousePos.Y)
+					}):Play()
+					task.wait()
+				until not dragging
+				WindowPositionConfig[name] = {x = Top.Position.X.Offset,y = Top.Position.Y.Offset}
+				if isfile("Moon/GuiLocations.json") then
+					delfile(readfile("Moon/GuiLocations.json"))
+					task.wait(1)
+				end
+				
+				writefile("Moon/GuiLocations.json",HttpService:JSONEncode(WindowPositionConfig))
+			end)
+		end
 	end)
+
+	Top.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+
+	local TopRound = Instance.new("Frame", Top)
+	TopRound.Size = UDim2.fromScale(1,0.2)
+	TopRound.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	TopRound.Position = UDim2.fromScale(0,-0.15)
+	TopRound.ZIndex = 5
+	Instance.new("UICorner",TopRound).CornerRadius = UDim.new(1,0)
 
 	if WindowPositionConfig[name].x ~= nil then
 		Top.Position = UDim2.fromOffset(WindowPositionConfig[name].x,WindowPositionConfig[name].y)
 	end
-
-	GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
-		Top.BackgroundColor3 = newTheme
-	end)
 
 	local ModuleFrame = Instance.new("ScrollingFrame", Top)
 	ModuleFrame.Position = UDim2.fromScale(0,1)
@@ -445,14 +499,16 @@ function GuiLibrary:CreateWindow(name)
 			local Button = Instance.new("TextButton", ModuleFrame)
 			Button.Size = UDim2.fromScale(1,0.07)
 			Button.BorderSizePixel = 0
-			Button.BackgroundColor3 = Color3.fromRGB(50,50,50)
+			Button.BackgroundColor3 = Color3.fromRGB(35,35,35)
 			Button.TextColor3 = Color3.fromRGB(255,255,255)
 			Button.TextSize = 10
 			Button.Text = "  "..tab.Name
 			Button.TextXAlignment = Enum.TextXAlignment.Left
 			Button.LayoutOrder = #ModuleFrame:GetChildren()
 			Button.BorderSizePixel = 0
-			Button.BackgroundTransparency = 0.5
+			Button.BackgroundTransparency = 0
+			Button.BorderSizePixel = 1
+			Button.BorderColor3 = Color3.fromRGB(25,25,25)
 
 			local SettingsLogo = Instance.new("ImageLabel", Button)
 			SettingsLogo.BackgroundTransparency = 1
@@ -477,7 +533,7 @@ function GuiLibrary:CreateWindow(name)
 			KeybindButton.Text = "  Keybind: NONE"
 			KeybindButton.TextXAlignment = Enum.TextXAlignment.Left
 			KeybindButton.LayoutOrder = 1
-			KeybindButton.BackgroundTransparency = 0.5
+			KeybindButton.BackgroundTransparency = 0
 
 			local KeybindConnection
 			local Keybind = Enum.KeyCode.Unknown
@@ -596,7 +652,7 @@ function GuiLibrary:CreateWindow(name)
 				Toggle.TextSize = 10
 				Toggle.Text = "  " .. tab2.Name
 				Toggle.TextXAlignment = Enum.TextXAlignment.Left
-				Toggle.BackgroundTransparency = 0.5
+				Toggle.BackgroundTransparency = 0
 
 				local SettingsSideLine = Instance.new("Frame", Toggle)
 				SettingsSideLine.Size = UDim2.fromScale(0.015, 1)
@@ -660,7 +716,7 @@ function GuiLibrary:CreateWindow(name)
 				GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
 					SettingsSideLine.BackgroundColor3 = darkenColor(newTheme, 0.6)
 				end)
-
+				SettingStats += 1
 				return ToggleFunctions
 			end
 
@@ -679,7 +735,7 @@ function GuiLibrary:CreateWindow(name)
 				Picker.TextColor3 = Color3.fromRGB(255, 255, 255)
 				Picker.TextSize = 10
 				Picker.TextXAlignment = Enum.TextXAlignment.Left
-				Picker.BackgroundTransparency = 0.5
+				Picker.BackgroundTransparency = 0
 
 				local SettingsSideLine = Instance.new("Frame", Picker)
 				SettingsSideLine.Size = UDim2.fromScale(0.015, 1)
@@ -724,7 +780,7 @@ function GuiLibrary:CreateWindow(name)
 				GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
 					SettingsSideLine.BackgroundColor3 = darkenColor(newTheme, 0.6)
 				end)
-
+				SettingStats += 1
 				updatePickerText()
 				return PickerFunctions
 			end
@@ -741,7 +797,7 @@ function GuiLibrary:CreateWindow(name)
 				SliderFrame.Size = UDim2.new(1, 0, 0, 40)
 				SliderFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 				SliderFrame.BorderSizePixel = 0
-				SliderFrame.BackgroundTransparency = 0.5
+				SliderFrame.BackgroundTransparency = 0
 
 				local SettingsSideLine = Instance.new("Frame", SliderFrame)
 				SettingsSideLine.Size = UDim2.fromScale(0.015,1)
@@ -851,7 +907,7 @@ function GuiLibrary:CreateWindow(name)
 					SettingsSideLine.BackgroundColor3 = darkenColor(newTheme, 0.6)
 					SliderFill.BackgroundColor3 = darkenColor(newTheme, 0.6)
 				end)
-
+				SettingStats += 1
 				return SliderFunctions
 			end
 
@@ -880,7 +936,13 @@ function GuiLibrary:CreateWindow(name)
 				KeybindButton.Text = "  Keybind: "..Config.Buttons[tab.Name].Keybind
 			end
 
+			Button.TouchLongPress:Connect(function()
+				SettingsFrame.Visible = not SettingsFrame.Visible
+			end)
+
 			table.insert(Modules, ButtonFunctions)
+
+			ModuleCount += 1
 
 			return ButtonFunctions
 		end,
@@ -900,6 +962,12 @@ UserInputService.InputBegan:Connect(function(key, gpe)
 		return
 	end
 
+	for i,v in pairs(GuiLibrary.Windows) do
+		v:Toggle()
+	end
+end)
+
+MobileSupportButton.MouseButton1Down:Connect(function(x, y)
 	for i,v in pairs(GuiLibrary.Windows) do
 		v:Toggle()
 	end
@@ -974,15 +1042,15 @@ ArrayX = ArrayListModule.CreateSlider({
 	Max = 1000,
 	Step = 1,
 	Function = function(v)
-		
+
 		v -= 350
-		
+
 		if v <= 300 then
 			ArrayListFrameSorter.HorizontalAlignment = Enum.HorizontalAlignment.Left
 		else
 			ArrayListFrameSorter.HorizontalAlignment = Enum.HorizontalAlignment.Right
 		end
-		
+
 		SubArrayListFrame.Position = UDim2.fromScale(v / 1000, SubArrayListFrame.Position.Y.Scale)
 	end,
 })
@@ -1119,3 +1187,7 @@ Uninject = GuiLibrary.Windows.Utility.CreateModuleButton({
 })
 
 shared.GuiLibrary = GuiLibrary
+
+task.delay(5, function()
+	print(ModuleCount, SettingStats)
+end)
