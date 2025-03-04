@@ -382,7 +382,7 @@ function GuiLibrary:CreateNotification(text, duration)
 
 	Notification.Size = UDim2.new(0,0,0.055,0)
 
-	TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Bounce), {
+	TweenService:Create(Notification, TweenInfo.new(0.3), {
 		Size = UDim2.new(0.05,size,0.055,0)
 	}):Play()
 
@@ -432,7 +432,7 @@ function GuiLibrary:CreateWindow(name)
 	Top.Size = UDim2.fromScale(0.1, 0.035)
 	Top.Position = UDim2.fromScale(0.15 + (0.12 * WindowCount), 0.15)
 	Top.BorderSizePixel = 0
-	Top.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	Top.BackgroundColor3 = Color3.fromRGB(25,25,25)
 	Top.Text = "  "..name
 	Top.TextColor3 = Color3.fromRGB(255,255,255)
 	Top.TextSize = 12
@@ -470,8 +470,8 @@ function GuiLibrary:CreateWindow(name)
 	end)
 
 	local TopRound = Instance.new("Frame", Top)
-	TopRound.Size = UDim2.fromScale(1,0.2)
-	TopRound.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	TopRound.Size = UDim2.fromScale(1,0.3)
+	TopRound.BackgroundColor3 = Color3.fromRGB(25,25,25)
 	TopRound.Position = UDim2.fromScale(0,-0.15)
 	TopRound.ZIndex = 5
 	Instance.new("UICorner",TopRound).CornerRadius = UDim.new(1,0)
@@ -510,11 +510,41 @@ function GuiLibrary:CreateWindow(name)
 			Button.BorderSizePixel = 1
 			Button.BorderColor3 = Color3.fromRGB(25,25,25)
 
+			local HoverTextInstance
+			Button.MouseEnter:Connect(function()
+				if tab.HoverText then
+					HoverTextInstance = Instance.new("TextLabel", ScreenGui)
+					HoverTextInstance.Size = UDim2.new(0,getAccurateTextSize("  "..tab.HoverText.."  ", 20),0.025,0)
+					HoverTextInstance.TextSize = 20
+					HoverTextInstance.BorderSizePixel = 1
+					HoverTextInstance.TextColor3 = Color3.fromRGB(255,255,255)
+					HoverTextInstance.BackgroundColor3 = Color3.fromRGB(25,25,25)
+					HoverTextInstance.BorderColor3 = Color3.fromRGB(0,0,0)
+					HoverTextInstance.Text = tab.HoverText
+					HoverTextInstance.Font = Enum.Font.SourceSans
+					HoverTextInstance.ZIndex = 10
+					
+					task.spawn(function()
+						repeat
+							local mousePos = UserInputService:GetMouseLocation()
+							HoverTextInstance.Position = UDim2.fromOffset(mousePos.X + 15, mousePos.Y)
+							task.wait()
+						until HoverTextInstance == nil	
+					end)
+				end
+			end)
+
+			Button.MouseLeave:Connect(function()
+				pcall(function()
+					HoverTextInstance:Destroy()
+				end)
+			end)
+
 			local SettingsLogo = Instance.new("ImageLabel", Button)
 			SettingsLogo.BackgroundTransparency = 1
 			SettingsLogo.Image = Assets.Settings
-			SettingsLogo.Size = UDim2.new(0.16, 0, 0,25)
-			SettingsLogo.Position = UDim2.fromScale(0.84,0.12)
+			SettingsLogo.Size = UDim2.new(0.11, 0, 0,20)
+			SettingsLogo.Position = UDim2.fromScale(0.84,0.25)
 			SettingsLogo.ZIndex = 4
 
 			local SettingsFrame = Instance.new("Frame", ModuleFrame)
@@ -578,45 +608,79 @@ function GuiLibrary:CreateWindow(name)
 			local DuplicateColorConnection
 			local DuplicateB2Connection
 
-			function ButtonFunctions:Toggle()
+			local LastButtonTween
+			local previousDuplicationParts = {}
+			local lastToggleState = tick()
+
+			function ButtonFunctions:Toggle(notif)
+
+				pcall(function()
+					LastButtonTween:Cancel()
+
+					if tick() - lastToggleState < 0.3 then
+						for i,v in pairs(previousDuplicationParts) do
+							v:Destroy()
+						end
+						table.clear(previousDuplicationParts)
+					end
+				end)
+
+				lastToggleState = tick()
+
 				ButtonFunctions.Enabled = not ButtonFunctions.Enabled
 
 				if ButtonFunctions.Enabled then
-					DuplicateButton = Button:Clone()
-					DuplicateButton.ImageLabel:Destroy()
-					DuplicateButton.ZIndex = 2
-					DuplicateButton.Parent = Button
-					DuplicateButton.Size = UDim2.fromScale(0,1)
-					DuplicateButton.BackgroundColor3 = GuiLibrary.Theme
-					DuplicateButton.BackgroundTransparency = 0.5
-					TweenService:Create(DuplicateButton, TweenInfo.new(0.3), {
-						Size = UDim2.fromScale(1,1)
-					}):Play()
+					pcall(function()
+						DuplicateButton = Button:Clone()
+						DuplicateButton.ImageLabel:Destroy()
+						DuplicateButton.ZIndex = 2
+						DuplicateButton.Parent = Button
+						DuplicateButton.Size = UDim2.fromScale(0,1)
+						DuplicateButton.BackgroundColor3 = GuiLibrary.Theme
+						DuplicateButton.BackgroundTransparency = 0.5
+						LastButtonTween = TweenService:Create(DuplicateButton, TweenInfo.new(0.3), {
+							Size = UDim2.fromScale(1,1)
+						})
+					
+						LastButtonTween:Play()
 
-					DuplicateConnection = DuplicateButton.MouseButton1Down:Connect(function()
-						ButtonFunctions:Toggle()
-					end)
-					DuplicateB2Connection = DuplicateButton.MouseButton2Down:Connect(function()
-						SettingsFrame.Visible = not SettingsFrame.Visible
-					end)
-					DuplicateColorConnection = GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
-						if CustomThemeRainbow.Enabled then
-							DuplicateButton.BackgroundColor3 = darkenColor(newTheme,0.8)
-							return
+						DuplicateConnection = DuplicateButton.MouseButton1Down:Connect(function()
+							ButtonFunctions:Toggle()
+						end)
+						DuplicateB2Connection = DuplicateButton.MouseButton2Down:Connect(function()
+							SettingsFrame.Visible = not SettingsFrame.Visible
+						end)
+						DuplicateColorConnection = GuiLibrary.ThemeUpdate.Event:Connect(function(newTheme)
+							if CustomThemeRainbow.Enabled then
+								if not Top.Visible then return end
+								DuplicateButton.BackgroundColor3 = darkenColor(newTheme,0.8)
+								return
+							end
+
+
+							DuplicateButton.BackgroundColor3 = newTheme
+						end)
+
+						table.insert(previousDuplicationParts, DuplicateButton)
+
+						ArrayList.Create(tab.Name)
+
+						if notif then
+							GuiLibrary:CreateNotification("Module ".. tab.Name .." has been Enabled!", 1)
 						end
-
-
-						DuplicateButton.BackgroundColor3 = newTheme
 					end)
-					ArrayList.Create(tab.Name)
-					GuiLibrary:CreateNotification("Module ".. tab.Name .." has been Enabled!", 1)
 				else
 					ArrayList.Remove(tab.Name)
-					TweenService:Create(DuplicateButton, TweenInfo.new(0.3), {
+					LastButtonTween = TweenService:Create(DuplicateButton, TweenInfo.new(0.3), {
 						Size = UDim2.fromScale(0,1)
-					}):Play()
+					})
+					
+					LastButtonTween:Play()
 
 					task.delay(0.3, function()
+
+						if ButtonFunctions.Enabled then return end
+
 						DuplicateButton:Destroy()
 						pcall(function()
 							DuplicateConnection:Disconnect()
@@ -625,7 +689,9 @@ function GuiLibrary:CreateWindow(name)
 						end)
 					end)
 
-					GuiLibrary:CreateNotification("Module ".. tab.Name .." has been Disabled!", 1)
+					if notif then
+						GuiLibrary:CreateNotification("Module ".. tab.Name .." has been Disabled!", 1)
+					end
 				end
 
 				Config.Buttons[tab.Name].Enabled = ButtonFunctions.Enabled
@@ -913,7 +979,7 @@ function GuiLibrary:CreateWindow(name)
 
 
 			Button.MouseButton1Down:Connect(function()
-				ButtonFunctions:Toggle()
+				ButtonFunctions:Toggle(true)
 			end)
 
 			Button.MouseButton2Down:Connect(function()
@@ -922,12 +988,12 @@ function GuiLibrary:CreateWindow(name)
 
 			UserInputService.InputBegan:Connect(function(key, gpe)
 				if gpe or key.KeyCode ~= Keybind or Keybind == Enum.KeyCode.Unknown then return end
-				ButtonFunctions:Toggle()
+				ButtonFunctions:Toggle(true)
 			end)
 
 			if Config.Buttons[tab.Name].Enabled then
 				task.delay(0.5, function()
-					ButtonFunctions:Toggle()
+					ButtonFunctions:Toggle(false)
 				end)
 			end
 
@@ -943,6 +1009,8 @@ function GuiLibrary:CreateWindow(name)
 			table.insert(Modules, ButtonFunctions)
 
 			ModuleCount += 1
+
+			ButtonFunctions.Name = tab.Name
 
 			return ButtonFunctions
 		end,
@@ -972,6 +1040,10 @@ MobileSupportButton.MouseButton1Down:Connect(function(x, y)
 		v:Toggle()
 	end
 end)
+
+if UserInputService.KeyboardEnabled then
+	MobileSupportButton.Visible = false
+end
 
 GuiLibrary:CreateWindow("Combat")
 GuiLibrary:CreateWindow("Movement")
@@ -1043,7 +1115,18 @@ ArrayX = ArrayListModule.CreateSlider({
 	Step = 1,
 	Function = function(v)
 
-		v -= 350
+		if v > 500 then
+			v -= 380
+		else
+			v -= (300 - 142)
+		end
+
+		local val = ArrayScale.Value
+		if ArrayScale.Value > 85 then
+			val = -25
+		end
+
+		v += (ArrayScale.Value / 2) + val
 
 		if v <= 300 then
 			ArrayListFrameSorter.HorizontalAlignment = Enum.HorizontalAlignment.Left
@@ -1184,6 +1267,7 @@ Uninject = GuiLibrary.Windows.Utility.CreateModuleButton({
 		ScreenGui:Destroy()
 		shared.GuiLibrary = nil
 	end,
+	HoverText = "Uninjects the script from the game."
 })
 
 shared.GuiLibrary = GuiLibrary
