@@ -58,7 +58,7 @@ end
 
 local canSave = true
 
-local configPath = "Moon/Configs/"..game.PlaceId..".json"
+local configPath = "Moon/Configs/"..tostring(game.PlaceId)..".json"
 
 local function saveconfig()
 	if not canSave then return end
@@ -416,7 +416,7 @@ end
 local WindowPositionConfig = {}
 
 if isfile("Moon/GuiLocations.json") then
-	WindowPositionConfig = HttpService:JSONDecode(readfile("Moon/GuiLocations.json"))
+	WindowPositionConfig = HttpService:JSONDecode(readfile("Moon/GuiLocations.json")) or {}
 end
 
 local ModuleCount, SettingStats = 0, 0
@@ -454,7 +454,7 @@ function GuiLibrary:CreateWindow(name)
 				until not dragging
 				WindowPositionConfig[name] = {x = Top.Position.X.Offset,y = Top.Position.Y.Offset}
 				if isfile("Moon/GuiLocations.json") then
-					delfile(readfile("Moon/GuiLocations.json"))
+					delfile("Moon/GuiLocations.json")
 					task.wait(1)
 				end
 				
@@ -583,6 +583,15 @@ function GuiLibrary:CreateWindow(name)
 					Config.Buttons[tab.Name].Keybind = tostring(Keybind):split(".")[3]:upper()
 					task.delay(0.1, saveconfig)
 				end)
+			end)
+
+			KeybindButton.MouseButton2Down:Connect(function()
+				task.wait()
+				KeybindButton.Text = "  Keybind: NONE"
+
+				Keybind = Enum.KeyCode.Unknown
+				Config.Buttons[tab.Name].Keybind = Enum.KeyCode.Unknown
+				task.delay(0.1, saveconfig)
 			end)
 
 			local KeybindSideLine = Instance.new("Frame", KeybindButton)
