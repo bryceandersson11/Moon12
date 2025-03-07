@@ -880,7 +880,7 @@ function GuiLibrary:CreateWindow(name)
 				SettingsSideLine.BorderSizePixel = 0
 				SettingsSideLine.BackgroundColor3 = Color3.fromRGB(30,30,30)
 
-				local SliderName = Instance.new("TextLabel", SliderFrame)
+				local SliderName = Instance.new("TextBox", SliderFrame)
 				SliderName.Size = UDim2.new(1, 0, 0.5, 0)
 				SliderName.Position = UDim2.new(0, 5, 0, 0)
 				SliderName.Text = tab2.Name .. " (" .. tab2.Default .. ")"
@@ -972,6 +972,13 @@ function GuiLibrary:CreateWindow(name)
 					end
 					task.delay(0.1,saveconfig)
 				end
+
+				SliderName.FocusLost:Connect(function()
+					local num = tonumber(SliderName.Text:match("[-%d%.]+"))
+					if num then
+						SliderFunctions.SetValue(num)
+					end
+				end)
 
 				SliderFunctions.SetValue(Config.Sliders[tab.Name.."_"..tab2.Name].Value)
 
