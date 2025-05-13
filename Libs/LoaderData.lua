@@ -1,7 +1,7 @@
 return {
   enabled = {
-    value = true,
-    reason = ""
+    value = false,
+    reason = "Moon is currently disabled for backend maintenance!"
   },
   invite = "discord.gg/getmoonclient"
 }
