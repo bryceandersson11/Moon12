@@ -3,6 +3,6 @@ return {
     value = true,
     reason = ""
   },
-  invite = "discord.gg/getmoonclient",
-  version = "v1.03"
+  invite = "https://discord.gg/KwTCW2UzQJ",
+  version = "v1.04"
 }
