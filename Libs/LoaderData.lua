@@ -4,5 +4,5 @@ return {
     reason = ""
   },
   invite = "https://discord.gg/KwTCW2UzQJ",
-  version = "v1.05"
+  version = "v1.04"
 }
